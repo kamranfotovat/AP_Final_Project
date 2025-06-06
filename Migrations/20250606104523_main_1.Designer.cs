@@ -3,6 +3,7 @@ using System;
 using GolestanProject.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GolestanProject.Migrations
 {
     [DbContext(typeof(MyAppContext))]
-    partial class MyAppContextModelSnapshot : ModelSnapshot
+    [Migration("20250606104523_main_1")]
+    partial class main_1
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.5");
@@ -225,21 +228,24 @@ namespace GolestanProject.Migrations
 
             modelBuilder.Entity("GolestanProject.Models.user_roles", b =>
                 {
-                    b.Property<int>("id_worthless")
+                    b.Property<int>("role_id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("role_id")
+                    b.Property<int>("ROLEid")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("USERid")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("user_id")
                         .HasColumnType("INTEGER");
 
-                    b.HasKey("id_worthless");
+                    b.HasKey("role_id");
 
-                    b.HasIndex("role_id");
+                    b.HasIndex("ROLEid");
 
-                    b.HasIndex("user_id");
+                    b.HasIndex("USERid");
 
                     b.ToTable("User_Roles");
                 });
@@ -365,13 +371,13 @@ namespace GolestanProject.Migrations
                 {
                     b.HasOne("GolestanProject.Models.roles", "ROLE")
                         .WithMany("USERROLES")
-                        .HasForeignKey("role_id")
+                        .HasForeignKey("ROLEid")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("GolestanProject.Models.users", "USER")
                         .WithMany("USERROLES")
-                        .HasForeignKey("user_id")
+                        .HasForeignKey("USERid")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
