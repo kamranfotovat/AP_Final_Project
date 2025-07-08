@@ -1,0 +1,28 @@
+﻿@model List<GolestanProject.Models.Role>
+
+@{
+    ViewData["Title"] = "Select Your Role";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div style="color: red;">
+        @TempData["ErrorMessage"]
+    </div>
+}
+
+<h3>Please select your role:</h3>
+
+<ul>
+    @foreach (var role in Model)
+    {
+        <li>
+            <form method="post" action="@Url.Action("RoleSelected", "Account")">
+                <input type="hidden" name="roleId" value="@role.id" />
+                <button type="submit">Select @role.name</button>
+            </form>
+        </li>
+    }
+</ul>

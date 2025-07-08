@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GolestanProject.Models
 {
-    public class teaches
+    public class Teaches
     {
         [Key]
         public int id_worthless { get; set; }
@@ -12,8 +12,8 @@ namespace GolestanProject.Models
 
 
         [ForeignKey("instructor_id")]
-        public instructors INSTRUCTOR { get; set; }
+        public Instructor INSTRUCTOR { get; set; }
         [ForeignKey("section_id")]
-        public sections SECTION { get; set; }
+        public Section SECTION { get; set; }
     }
 }

@@ -4,7 +4,7 @@ using System.Security.AccessControl;
 
 namespace GolestanProject.Models
 {
-    public class takes
+    public class Takes
     {
         [Key]
         public int id_worthless { get; set; }
@@ -14,8 +14,8 @@ namespace GolestanProject.Models
         public float grade { get; set; }
 
         [ForeignKey("student_id")]
-        public students STUDENT { get; set; }
+        public Student STUDENT { get; set; }
         [ForeignKey("section_id")]
-        public sections SECTION { get; set; }
+        public Section SECTION { get; set; }
     }
 }

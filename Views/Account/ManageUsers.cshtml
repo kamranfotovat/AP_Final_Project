@@ -1,0 +1,28 @@
+﻿@* @model IEnumerable<GolestanProject.Models.users> *@
+
+@* <h2>Manage Users</h2> *@
+
+@* <table> *@
+@*     <thead> *@
+@*         <tr> *@
+@*             <th>Name</th> *@
+@*             <th>Email</th> *@
+@*             <th>Role</th> *@
+@*             <th>Actions</th> *@
+@*         </tr> *@
+@*     </thead> *@
+@*     <tbody> *@
+@*         @foreach (var user in Model) *@
+@*         { *@
+@*             <tr> *@
+@*                 <td>@user.first_name @user.last_name</td> *@
+@*                 <td>@user.email</td> *@
+@*                 <td>@user.Role.name</td> *@
+@*                 <td> *@
+@*                     <a href="@Url.Action("EditUser", "Admin", new { id = user.id })">Edit</a> | *@
+@*                     <a href="@Url.Action("DeleteUser", "Admin", new { id = user.id })">Delete</a> *@
+@*                 </td> *@
+@*             </tr> *@
+@*         } *@
+@*     </tbody> *@
+@* </table> *@

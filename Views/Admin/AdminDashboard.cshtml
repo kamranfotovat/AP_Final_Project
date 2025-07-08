@@ -1,0 +1,17 @@
+﻿@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<h1>Welcome to the Admin Dashboard!</h1>
+
+<p>
+    This is where admin-specific content will go.
+</p>
+
+<div>
+    <a asp-action="ManageUsers" asp-controller="Admin">Manage Users</a>
+    <br />
+    <a asp-action="AdminCreateUser" asp-controller="Admin">Create New User</a>
+    <br />
+    <a asp-action="Logout" asp-controller="Account">Logout</a>
+</div>

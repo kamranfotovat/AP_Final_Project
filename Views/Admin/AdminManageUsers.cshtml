@@ -1,0 +1,59 @@
+﻿@model IEnumerable<GolestanProject.Models.User> 
+
+@{
+    ViewData["Title"] = "Manage Users";
+}
+
+<h1>Manage Users</h1>
+
+<p>
+    <a asp-action="AdminCreateUser">Create New User</a>
+</p>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["SuccessMessage"]
+    </div>
+}
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Created At</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Model)
+        {
+            <tr>
+                <td>@user.first_name</td>
+                <td>@user.last_name</td>
+                <td>@user.email</td>
+                <td>
+                    @* Display the user's role. A user might have multiple roles, but for simplicity, we'll display the first one. *@
+                    @if (user.USERROLES != null && user.USERROLES.Any())
+                    {
+                        @user.USERROLES.FirstOrDefault()?.ROLE?.name
+                    }
+                    else
+                    {
+                        <span>No Role Assigned</span>
+                    }
+                </td>
+                <td>@user.created_at.ToShortDateString()</td>
+                <td>
+                    @* These links will be implemented later when you create Edit and Delete actions *@
+                    <a asp-action="AdminEditUser" asp-route-id="@user.id">Edit</a> |
+                    <a asp-action="AdminDetailsUser" asp-route-id="@user.id">Details</a> |
+                    <a asp-action="AdminDeleteUser" asp-route-id="@user.id">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
