@@ -1,0 +1,86 @@
+﻿@model GolestanProject.ViewModels.AdminDetailsUserViewModel
+
+@{
+    ViewData["Title"] = "User Details";
+}
+
+<h1>User Details</h1>
+
+<div>
+    <h4>User Information</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.FirstName)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.FirstName)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.LastName)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.LastName)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Email)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Email)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.PrimaryRoleName)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.PrimaryRoleName)
+        </dd>
+    </dl>
+
+    @* Display ALL Student Details if any exist *@
+    @if (Model.Students != null && Model.Students.Any())
+    {
+        <h4>Student Accounts</h4>
+        <hr />
+        @foreach (var student in Model.Students)
+        {
+            <dl class="row mb-3">
+                @* mb-3 adds some margin between multiple accounts *@
+                <dt class="col-sm-3">Student ID:</dt>
+                <dd class="col-sm-9">@student.student_id</dd>
+                <dt class="col-sm-3">Enrollment Date:</dt>
+                <dd class="col-sm-9">@student.enrollment_date.ToShortDateString()</dd>
+                @* Add any other Student properties you want to display *@
+            </dl>
+        }
+    }
+    else if (Model.PrimaryRoleName == "Student")
+    {
+        <p>No student accounts found for this user.</p>
+    }
+
+    @* Display ALL Instructor Details if any exist *@
+    @if (Model.Instructors != null && Model.Instructors.Any())
+    {
+        <h4>Instructor Accounts</h4>
+        <hr />
+        @foreach (var instructor in Model.Instructors)
+        {
+            <dl class="row mb-3">
+                <dt class="col-sm-3">Instructor ID:</dt>
+                <dd class="col-sm-9">@instructor.instructor_id</dd>
+                <dt class="col-sm-3">Salary:</dt>
+                <dd class="col-sm-9">@instructor.salary.ToString("C")</dd> @* CORRECTED: Removed '?' *@
+                <dt class="col-sm-3">Hire Date:</dt>
+                <dd class="col-sm-9">@instructor.hire_date.ToShortDateString()</dd>
+                @* Add any other Instructor properties you want to display *@
+            </dl>
+        }
+    }
+    else if (Model.PrimaryRoleName == "Instructor")
+    {
+        <p>No instructor accounts found for this user.</p>
+    }
+</div>
+<div>
+    <a asp-action="AdminManageUsers">Back to List</a>
+</div>

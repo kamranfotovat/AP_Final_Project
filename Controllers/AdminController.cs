@@ -4,8 +4,10 @@ using GolestanProject.Models;
 using System.Linq;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Http;
-using BCrypt.Net; // For password hashing
-
+using BCrypt.Net;
+using GolestanProject.ViewModels; // For password hashing
+using System.Threading.Tasks; // For async/await operations
+using System; // For DateTime operations
 
 
 
@@ -35,89 +37,40 @@ namespace GolestanProject.Controllers
             {
                 return RedirectToAction("SelectRole", "Account");
             }
-            return View();
-            //var roles = _context.Roles.ToList();
-            //ViewBag.Roles = roles;
-            //return View(new User());
+            return View(new AdminCreateUserViewModel()); // Pass a new, empty ViewModel to the view
         }
 
         // POST METHOD
         [HttpPost]
-        [ValidateAntiForgeryToken]
+        [ValidateAntiForgeryToken] // Recommended for POST actions to prevent XSRF attacks
         public async Task<IActionResult> AdminCreateUser(AdminCreateUserViewModel model)
         {
-            var selectedRole = HttpContext.Session.GetString("SelectedRole");
-            if (selectedRole != "Admin")
-            {
-                return RedirectToAction("SelectRole", "Account");
-            }
             if (ModelState.IsValid)
             {
-                var newUser = new User
+                // Check if a user with this email already exists
+                if (await _context.Users.AnyAsync(u => u.email == model.Email))
+                {
+                    ModelState.AddModelError("Email", "A user with this email already exists.");
+                    return View(model); // Return to view with error
+                }
+
+                var user = new User
                 {
                     first_name = model.FirstName,
                     last_name = model.LastName,
                     email = model.Email,
-                    hashed_password = BCrypt.Net.BCrypt.HashPassword(model.Password),
-                    created_at = DateTime.Now
+                    hashed_password = BCrypt.Net.BCrypt.HashPassword(model.Password) // Hash the password
                 };
 
-                _context.Users.Add(newUser);
-                await _context.SaveChangesAsync();
+                _context.Users.Add(user);
+                await _context.SaveChangesAsync(); // Save the new user to the database
 
-                var role = await _context.Roles.FirstOrDefaultAsync(a => a.name == model.SelectedRoleName);
-                if (role == null)
-                {
-                    ModelState.AddModelError(string.Empty, "Selected role not found");
-                    return View(model);
-                }
-
-                var userRole = new User_Role
-                {
-                    user_id = newUser.id,
-                    role_id = role.id
-                };
-
-                _context.User_Roles.Add(userRole);
-
-                if (model.SelectedRoleName == "Student")
-                {
-                    if (!model.EnrollmentDate.HasValue)
-                    {
-                        ModelState.AddModelError("EnrollmentDate", "Enrollment Date is required for student.");
-                        return View(model);
-                    }
-                    var student = new Student
-                    {
-                        user_id = newUser.id,
-                        enrollment_date = model.EnrollmentDate.Value
-                    };
-                    _context.Students.Add(student);
-                }
-                else if (model.SelectedRoleName == "Instructor")
-                {
-                    if (!model.Salary.HasValue)
-                    {
-                        ModelState.AddModelError("Salary", "Salary is required for Instructor");
-                        return View(model);
-                    }
-                    var instructor = new Instructor
-                    {
-                        user_id = newUser.id,
-                        salary = model.Salary.Value,
-                        hire_date = model.HireDate.Value
-                    };
-                    _context.Instructors.Add(instructor);
-                }
-                else
-                {
-                    ModelState.AddModelError("", "Invalid role selected");
-                    return View(model);
-                }
-                await _context.SaveChangesAsync();
-                TempData["SuccessMessage"] = $"User {model.Email} created successfully";
-                return RedirectToAction("AdminManageUsers");
+                TempData["SuccessMessage"] = $"User '{user.email}' created successfully!";
+                // After successful creation, clear the form by returning a new ViewModel
+                return View(new AdminCreateUserViewModel());
             }
+
+            // If ModelState is not valid, return the same view with validation errors
             return View(model);
         }
 
@@ -126,6 +79,153 @@ namespace GolestanProject.Controllers
 
             var users = _context.Users.Include(a => a.USERROLES).ThenInclude(b => b.ROLE).ToList();
             return View(users);
+        }
+
+        public IActionResult AdminAssignRole()
+        {
+            var selectedRole = HttpContext.Session.GetString("SelectedRole");
+            if (selectedRole != "Admin")
+            {
+                return RedirectToAction("SelectRole", "Account");
+            }
+            return View(new AdminAssignRoleViewModel()); // Pass an empty ViewModel to the view
+        }
+
+        // --- ASSIGN ROLE & CREATE ACCOUNT (POST) ---
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AdminAssignRole(AdminAssignRoleViewModel model)
+        {
+            var selectedRole = HttpContext.Session.GetString("SelectedRole");
+            if (selectedRole != "Admin")
+            {
+                return RedirectToAction("SelectRole", "Account");
+            }
+
+            // --- Server-side validation based on selected role ---
+            if (model.SelectedRoleName == "Student")
+            {
+                if (!model.StudentEnrollmentDate.HasValue)
+                {
+                    ModelState.AddModelError(nameof(model.StudentEnrollmentDate), "Enrollment Date is required for Student role.");
+                }
+                else if (model.StudentEnrollmentDate.Value > DateTime.Today)
+                {
+                    ModelState.AddModelError(nameof(model.StudentEnrollmentDate), "Enrollment Date cannot be in the future.");
+                }
+            }
+            else if (model.SelectedRoleName == "Instructor")
+            {
+                if (!model.InstructorSalary.HasValue)
+                {
+                    ModelState.AddModelError(nameof(model.InstructorSalary), "Salary is required for Instructor role.");
+                }
+                else if (model.InstructorSalary.Value < 0)
+                {
+                    ModelState.AddModelError(nameof(model.InstructorSalary), "Salary cannot be negative.");
+                }
+
+                if (!model.InstructorHireDate.HasValue)
+                {
+                    ModelState.AddModelError(nameof(model.InstructorHireDate), "Hire Date is required for Instructor role.");
+                }
+                else if (model.InstructorHireDate.Value > DateTime.Today)
+                {
+                    ModelState.AddModelError(nameof(model.InstructorHireDate), "Hire Date cannot be in the future.");
+                }
+            }
+            // Add other roles here if they have specific requirements and accounts (e.g., Admin doesn't need an account usually)
+            else
+            {
+                ModelState.AddModelError(nameof(model.SelectedRoleName), "Invalid role selected.");
+            }
+
+            // Now check overall ModelState validity
+            if (ModelState.IsValid)
+            {
+                // Find the user by email
+                var user = await _context.Users
+                                         .Include(u => u.USERROLES)
+                                             .ThenInclude(ur => ur.ROLE)
+                                         .Include(u => u.STUDENTS)
+                                         .Include(u => u.INSTRUCTORS)
+                                         .FirstOrDefaultAsync(u => u.email == model.TargetUserEmail);
+
+                if (user == null)
+                {
+                    ModelState.AddModelError(nameof(model.TargetUserEmail), "User with this email not found.");
+                    return View(model); // Return to view with error
+                }
+
+                // Get the Role entity from the database
+                var role = await _context.Roles.FirstOrDefaultAsync(r => r.name == model.SelectedRoleName);
+                if (role == null)
+                {
+                    ModelState.AddModelError(nameof(model.SelectedRoleName), "Selected role is not valid.");
+                    return View(model);
+                }
+
+                // --- Assign Role if not already assigned ---
+                var userRole = user.USERROLES.FirstOrDefault(ur => ur.role_id == role.id);
+                if (userRole == null)
+                {
+                    user.USERROLES.Add(new User_Role { user_id = user.id, role_id = role.id });
+                    await _context.SaveChangesAsync();
+                }
+
+                // --- Create Account based on Selected Role ---
+                if (model.SelectedRoleName == "Student")
+                {
+                    // Check if a Student account already exists for this user.
+                    // This allows for multiple student accounts if your design permits.
+                    // If you want ONLY ONE student account per user, you'd check `user.STUDENTS.Any()`.
+                    // For now, we'll allow multiple if student_id is a primary key that supports it,
+                    // or enforce one if `user_id` is unique in `Students` table.
+                    // Assuming you want to allow creating another student account if StudentId isn't provided.
+                    // If you want to strictly prevent duplicate student *accounts* linked to the same user:
+                    if (user.STUDENTS.Any(s => s.user_id == user.id))
+                    {
+                        ModelState.AddModelError("", $"User '{user.email}' already has a Student account.");
+                        return View(model);
+                    }
+
+
+                    var student = new Student
+                    {
+                        user_id = user.id,
+                        enrollment_date = model.StudentEnrollmentDate.Value // Use .Value because HasValue was checked
+                    };
+                    _context.Students.Add(student);
+                    await _context.SaveChangesAsync();
+                    TempData["SuccessMessage"] = $"Student account created and '{model.SelectedRoleName}' role assigned to '{user.email}'.";
+                }
+                else if (model.SelectedRoleName == "Instructor")
+                {
+                    // Similar check for instructor account
+                    if (user.INSTRUCTORS.Any(i => i.user_id == user.id))
+                    {
+                        ModelState.AddModelError("", $"User '{user.email}' already has an Instructor account.");
+                        return View(model);
+                    }
+
+                    var instructor = new Instructor
+                    {
+                        user_id = user.id,
+                        salary = model.InstructorSalary.Value,
+                        hire_date = model.InstructorHireDate.Value
+                    };
+                    _context.Instructors.Add(instructor);
+                    await _context.SaveChangesAsync();
+                    TempData["SuccessMessage"] = $"Instructor account created and '{model.SelectedRoleName}' role assigned to '{user.email}'.";
+                }
+
+                // If successful, clear the form by returning a new, empty ViewModel
+                return View(new AdminAssignRoleViewModel());
+            }
+
+            // If ModelState is not valid (due to missing required fields for the selected role),
+            // return the same view with validation errors.
+            return View(model);
         }
     }
 

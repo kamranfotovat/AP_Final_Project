@@ -11,6 +11,7 @@ builder.Services.AddDbContext<MyAppContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"))
 );
 
+builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(30); // Sets how long a session can be inactive before it expires

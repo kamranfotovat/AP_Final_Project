@@ -1,17 +1,27 @@
-﻿@{
+﻿@* File: Views/Admin/AdminDashboard.cshtml *@
+@{
     ViewData["Title"] = "Admin Dashboard";
 }
 
-<h1>Welcome to the Admin Dashboard!</h1>
+<div class="text-center">
+    <h1 class="display-4">Admin Dashboard</h1>
+    <p>Welcome, Administrator!</p>
+    <hr />
+</div>
 
-<p>
-    This is where admin-specific content will go.
-</p>
-
-<div>
-    <a asp-action="ManageUsers" asp-controller="Admin">Manage Users</a>
-    <br />
-    <a asp-action="AdminCreateUser" asp-controller="Admin">Create New User</a>
-    <br />
-    <a asp-action="Logout" asp-controller="Account">Logout</a>
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="list-group">
+            <a asp-action="AdminCreateUser" asp-controller="Admin" class="list-group-item list-group-item-action">
+                Create New User
+            </a>
+            <a asp-action="AdminAssignRole" asp-controller="Admin" class="list-group-item list-group-item-action">
+                Assign Role & Create Account
+            </a>
+            @* Add other admin links here as needed *@
+            <a asp-action="Logout" asp-controller="Account" class="list-group-item list-group-item-action list-group-item-danger mt-3">
+                Logout
+            </a>
+        </div>
+    </div>
 </div>

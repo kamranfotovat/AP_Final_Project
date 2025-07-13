@@ -1,0 +1,89 @@
+﻿@model GolestanProject.ViewModels.AdminAssignRoleViewModel
+@{
+    ViewData["Title"] = "Assign Role & Create Account";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Assign Role & Create Account</h1>
+    <hr />
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <form asp-action="AdminAssignRole" method="post">
+            <div asp-validation-summary="All" class="text-danger"></div> @* Displays all model-level and property-level validation errors *@
+
+            @* Success Message Display *@
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success mt-3" role="alert">
+                    @TempData["SuccessMessage"]
+                </div>
+            }
+
+            @* Input for Target User's Email *@
+            <div class="form-group mb-3">
+                <label asp-for="TargetUserEmail" class="form-label"></label>
+                <input asp-for="TargetUserEmail" class="form-control" />
+                <span asp-validation-for="TargetUserEmail" class="text-danger"></span>
+            </div>
+
+            <h4 class="mt-4">Select Role:</h4>
+            <div class="form-group mb-3">
+                @* Radio Button for Student Role *@
+                <div class="form-check">
+                    <input type="radio" asp-for="SelectedRoleName" value="Student" class="form-check-input" id="roleStudent">
+                    <label class="form-check-label" for="roleStudent">Student</label>
+                </div>
+                @* Radio Button for Instructor Role *@
+                <div class="form-check">
+                    <input type="radio" asp-for="SelectedRoleName" value="Instructor" class="form-check-input" id="roleInstructor">
+                    <label class="form-check-label" for="roleInstructor">Instructor</label>
+                </div>
+                @* Add more roles here if they are assignable via this page and don't require specific account details (e.g., "Admin" if you want to assign that role without an extra account) *@
+
+                <span asp-validation-for="SelectedRoleName" class="text-danger"></span>
+            </div>
+
+            <h4 class="mt-4">Account Details (Fill only relevant fields based on selected role):</h4>
+
+            <div class="card card-body bg-light mb-3">
+                <h5>Student Account Details</h5>
+                @* Student Enrollment Date *@
+                <div class="form-group mb-3">
+                    <label asp-for="StudentEnrollmentDate" class="form-label"></label>
+                    <input asp-for="StudentEnrollmentDate" class="form-control" type="date" /> @* Use type="date" for HTML5 date picker *@
+                    <span asp-validation-for="StudentEnrollmentDate" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="card card-body bg-light mb-3">
+                <h5>Instructor Account Details</h5>
+                @* Instructor Salary *@
+                <div class="form-group mb-3">
+                    <label asp-for="InstructorSalary" class="form-label"></label>
+                    <input asp-for="InstructorSalary" class="form-control" type="number" step="0.01" /> @* Use type="number" *@
+                    <span asp-validation-for="InstructorSalary" class="text-danger"></span>
+                </div>
+
+                @* Instructor Hire Date *@
+                <div class="form-group mb-3">
+                    <label asp-for="InstructorHireDate" class="form-label"></label>
+                    <input asp-for="InstructorHireDate" class="form-control" type="date" /> @* Use type="date" *@
+                    <span asp-validation-for="InstructorHireDate" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-primary mt-3">Assign Role & Create Account</button>
+                <a asp-action="AdminDashboard" class="btn btn-secondary mt-2">Back to Admin Dashboard</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
